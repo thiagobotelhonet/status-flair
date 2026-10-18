@@ -2,20 +2,20 @@
   "name": "status-flair",
   "displayName": "Status Flair",
   "description": "Personalize your status bar, and keep every Claude Code session, worktree and pull request one click away.",
-  "version": "0.4.0",
-  "publisher": "thiagocorreanet",
+  "version": "0.4.1",
+  "publisher": "thiagobotelhonet",
   "author": {
     "name": "Thiago Corrêa"
   },
   "license": "MIT",
   "icon": "images/icon.png",
-  "homepage": "https://github.com/thiagocorreanet/status-flair#readme",
+  "homepage": "https://github.com/thiagobotelhonet/status-flair#readme",
   "repository": {
     "type": "git",
-    "url": "https://github.com/thiagocorreanet/status-flair.git"
+    "url": "https://github.com/thiagobotelhonet/status-flair.git"
   },
   "bugs": {
-    "url": "https://github.com/thiagocorreanet/status-flair/issues"
+    "url": "https://github.com/thiagobotelhonet/status-flair/issues"
   },
   "engines": {
     "vscode": "^1.90.0"

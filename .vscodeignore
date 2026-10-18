@@ -8,3 +8,8 @@ out/test/**
 tsconfig.json
 .gitignore
 node_modules/**
+.github/**
+docs/**
+CONTRIBUTING.md
+SECURITY.md
+CODE_OF_CONDUCT.md

@@ -1,5 +1,9 @@
 # Changelog
 
+## 0.4.1
+
+- README rewritten for the Marketplace: install requirements, privacy and uninstall notes, and screenshots.
+
 ## 0.4.0
 
 - Claude Lens: a live panel (activity bar) showing what each Claude Code session is doing: current action with a timer, subagents, this turn's timeline with results and durations, and files changed with +/- lines. A status bar item shows the current action (`Editing controller.ts`) and opens it. Works with the Claude Code VS Code extension.
