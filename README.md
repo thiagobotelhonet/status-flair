@@ -2,12 +2,9 @@
 
 [![Marketplace](https://img.shields.io/visual-studio-marketplace/v/thiagobotelhonet.status-flair?label=Marketplace)](https://marketplace.visualstudio.com/items?itemName=thiagobotelhonet.status-flair)
 [![Installs](https://img.shields.io/visual-studio-marketplace/i/thiagobotelhonet.status-flair)](https://marketplace.visualstudio.com/items?itemName=thiagobotelhonet.status-flair)
-[![CI](https://github.com/thiagobotelhonet/status-flair/actions/workflows/ci.yml/badge.svg)](https://github.com/thiagobotelhonet/status-flair/actions/workflows/ci.yml)
 [![License: MIT](https://img.shields.io/badge/license-MIT-blue.svg)](LICENSE)
 
 Status Flair puts your own item and colors in the VS Code status bar. If you work with Claude Code, it also shows what each session is doing, how much of your plan is left, and which agent finished in which git worktree.
-
-It started as a rewrite of [Status Bar Customizer](https://github.com/EduardoPires/vscode-status-bar-custom-item) by Eduardo Pires and grew from there.
 
 > Status Flair is an independent project. It is not made by, affiliated with, or endorsed by Anthropic. "Claude" and "Claude Code" are trademarks of Anthropic, used here only to describe compatibility.
 

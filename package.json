@@ -2,7 +2,7 @@
   "name": "status-flair",
   "displayName": "Status Flair",
   "description": "Personalize your status bar, and keep every Claude Code session, worktree and pull request one click away.",
-  "version": "0.4.0",
+  "version": "0.4.1",
   "publisher": "thiagobotelhonet",
   "author": {
     "name": "Thiago Corrêa"
