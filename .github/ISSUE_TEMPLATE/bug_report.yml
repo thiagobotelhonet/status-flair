@@ -1,0 +1,72 @@
+name: Bug report
+description: Something does not work the way the README says it should.
+labels: [bug]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Thanks for reporting this. Please search the open issues first, in case someone already did.
+        Security problems go through private reporting instead; see SECURITY.md.
+  - type: dropdown
+    id: area
+    attributes:
+      label: Area
+      options:
+        - Custom status bar item
+        - Colors
+        - Claude Code item or usage panel
+        - Claude Lens
+        - Claude sessions inbox or notifications
+        - Worktrees
+        - Pull request item
+        - Something else
+    validations:
+      required: true
+  - type: textarea
+    id: what-happened
+    attributes:
+      label: What happened
+      description: What you saw, and what you expected to see instead.
+    validations:
+      required: true
+  - type: textarea
+    id: steps
+    attributes:
+      label: Steps to reproduce
+      placeholder: |
+        1. Open a folder with...
+        2. Run "Status Flair: ..."
+        3. ...
+    validations:
+      required: true
+  - type: input
+    id: versions
+    attributes:
+      label: Versions
+      description: Status Flair, VS Code and your operating system. Add Claude Code's version (`claude --version`) for Claude issues.
+      placeholder: Status Flair 0.4.0, VS Code 1.142, Windows 11, Claude Code 2.1.301
+    validations:
+      required: true
+  - type: dropdown
+    id: claude-setup
+    attributes:
+      label: How you use Claude Code
+      description: Only for Claude Code issues.
+      options:
+        - Not relevant
+        - Terminal (claude CLI)
+        - VS Code extension
+        - Both
+  - type: dropdown
+    id: connected
+    attributes:
+      label: Did you run "Status Flair: Connect to Claude Code"?
+      options:
+        - Not relevant
+        - "Yes"
+        - "No"
+  - type: textarea
+    id: extra
+    attributes:
+      label: Anything else
+      description: Screenshots, relevant settings, or errors from "Developer: Show Logs… > Extension Host".

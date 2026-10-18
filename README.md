@@ -1,14 +1,39 @@
 # Status Flair
 
-Make the VS Code status bar yours: a personal item, colors for the whole bar or for each project, and a live Claude Code indicator that tells you when Claude is working, waiting for you, or done.
+[![Marketplace](https://img.shields.io/visual-studio-marketplace/v/thiagobotelhonet.status-flair?label=Marketplace)](https://marketplace.visualstudio.com/items?itemName=thiagobotelhonet.status-flair)
+[![Installs](https://img.shields.io/visual-studio-marketplace/i/thiagobotelhonet.status-flair)](https://marketplace.visualstudio.com/items?itemName=thiagobotelhonet.status-flair)
+[![CI](https://github.com/thiagobotelhonet/status-flair/actions/workflows/ci.yml/badge.svg)](https://github.com/thiagobotelhonet/status-flair/actions/workflows/ci.yml)
+[![License: MIT](https://img.shields.io/badge/license-MIT-blue.svg)](LICENSE)
+
+Status Flair puts your own item and colors in the VS Code status bar. If you work with Claude Code, it also shows what each session is doing, how much of your plan is left, and which agent finished in which git worktree.
+
+It started as a rewrite of [Status Bar Customizer](https://github.com/EduardoPires/vscode-status-bar-custom-item) by Eduardo Pires and grew from there.
 
 > Status Flair is an independent project. It is not made by, affiliated with, or endorsed by Anthropic. "Claude" and "Claude Code" are trademarks of Anthropic, used here only to describe compatibility.
 
+![The Claude Lens panel showing the current action, subagents, this turn's timeline and changed files](docs/images/claude-lens.png)
+
+## Install
+
+Search for "Status Flair" in the Extensions view, or run:
+
+```bash
+code --install-extension thiagobotelhonet.status-flair
+```
+
+You need VS Code 1.90 or later. Everything else is optional and only matters for the feature that uses it:
+
+| Feature | Needs |
+| --- | --- |
+| Claude Code item, Lens, inbox | Claude Code, and Node.js on your PATH for the hooks |
+| Worktrees | git |
+| Pull request and CI status | The [GitHub CLI](https://cli.github.com), signed in |
+
 ## Features
 
-### Your own item
+### Your own status bar item
 
-Shows `$(flame) <your user name>` by default. Change the text, icon, tooltip, side and position, and choose what a click does.
+By default the item shows `$(flame) <your user name>`. You can change the text, icon, tooltip, side and position, and choose what a click does.
 
 ```jsonc
 "statusFlair.item.text": "${user} on ${gitBranch}",
@@ -18,23 +43,24 @@ Shows `$(flame) <your user name>` by default. Change the text, icon, tooltip, si
 "statusFlair.item.clickValue": "https://github.com"
 ```
 
-Variables that work in any text or tooltip:
+These variables work in any text or tooltip:
 
 | Variable | Value |
 | --- | --- |
 | `${user}` | Your OS user name |
 | `${workspaceName}` | Workspace name |
 | `${folderName}` | Folder of the active file |
-| `${gitBranch}` | Current Git branch |
-| `${time}` / `${date}` | Current time / date |
+| `${gitBranch}` | Current git branch |
+| `${worktreeName}` / `${worktreeCount}` | Current worktree and how many the repository has |
+| `${prNumber}` / `${issueTitle}` | Pull request of the branch and the issue its name points to |
+| `${time}` / `${date}` | Current time and date |
 | `${claudeModel}` | Model of the latest Claude Code session in this workspace |
-| `${claudeContext}` | Its context size, like `49k` |
-| `${claudeContextPercent}` | How full the context window is, like `16%` |
-| `${claudeState}` | `working`, `waiting for you`, `done`… |
+| `${claudeContext}` / `${claudeContextPercent}` | Its context size, like `49k`, and how full the window is, like `16%` |
+| `${claudeState}` | `working`, `waiting for you`, `done` and so on |
 | `${claudeUsage5h}` / `${claudeUsageWeek}` | Plan usage in the 5-hour and weekly windows, like `41%` |
 | `${claudeCost}` | Session cost as Claude Code reports it, like `$4.12` |
 
-Need more items? Add them to `statusFlair.extraItems`:
+For more items, add them to `statusFlair.extraItems`:
 
 ```jsonc
 "statusFlair.extraItems": [
@@ -45,130 +71,112 @@ Need more items? Add them to `statusFlair.extraItems`:
 
 ### Status bar colors
 
-Run **Status Flair: Pick Status Bar Color** and move through the presets: the bar previews each one live. You can also enter any hex color or roll a random one. Random colors always keep white text readable (4.5:1 contrast).
+Run **Status Flair: Pick Status Bar Color** and move through the presets; the bar previews each one as you go. You can also type a hex color or roll a random one. Random colors keep white text readable at a 4.5:1 contrast ratio.
 
-Set only `statusFlair.colors.background` and the rest is derived for you: text color for contrast, plus darker shades for "no folder", debugging, and the remote indicator. Any of them can be set explicitly.
+If you only set `statusFlair.colors.background`, the rest is derived from it: a readable text color, and darker shades for "no folder", debugging and the remote indicator. You can set any of them yourself.
 
-**One color per project.** Run **Status Flair: Pick Color for This Workspace** and the color goes to that project's `.vscode/settings.json`. Windows of different projects then look different at a glance. To make this the default, set `statusFlair.colors.target` to `workspace`.
+To give one project its own color, run **Status Flair: Pick Color for This Workspace**. The color goes to that project's `.vscode/settings.json`, which makes windows of different projects easy to tell apart. Set `statusFlair.colors.target` to `workspace` to make that the default.
 
-**Your settings are safe.** Status Flair remembers what each color key held before it took it over, and puts it back when you remove the color or run **Status Flair: Reset Colors**. It only writes to `settings.json` when something actually changes.
+Status Flair remembers what each color key held before it took it over and restores it when you remove the color or run **Status Flair: Reset Colors**. It writes to `settings.json` only when a value actually changes.
 
 ### Claude Code
 
-When Claude Code has a session in the open folder, a Claude item appears in the status bar showing the model and how full the context is:
+When a Claude Code session runs in the open folder, a Claude item shows its model and context size, with an icon for its state: idle, working (spinning), waiting for your permission or answer (warning background), or just finished.
 
-| Icon | State |
-| --- | --- |
-| ✦ | Idle |
-| ⟳ (spinning) | Claude is working |
-| 🔔 (warning background) | Claude is waiting for your permission or answer |
-| ✓ | Claude just finished |
+Hover it for the usage panel: the 5-hour and weekly plan limits with their reset times, the weekly limit per model, the context window, and the session's cost and tokens. The item turns amber when a limit passes `statusFlair.claude.usageWarningThreshold` (80% by default) or the context passes `contextWarningThreshold` (70%), and the panel then suggests `/compact`. After a few readings it also projects your pace, for example "At this pace it runs out Thu 3:00 PM".
 
-Hover it for a usage panel:
+![The usage panel in dark and light themes, and with a limit reached](docs/images/usage-panel.png)
 
-```text
-Claude Code · Opus 5.5 — working
-─────────────────────────────────────────
-Session (5h) · resets 14:20
-████████░░░░░░░░░░░░ 41% used
+Model and token counts come from Claude Code's local transcripts in `~/.claude/projects`, so they work right away. Plan limits come from your `/usage` reports and from Claude Code's [status line input](https://code.claude.com/docs/en/statusline); they are only reported for Pro and Max plans.
 
-Weekly · resets Fri 21:00
-███░░░░░░░░░░░░░░░░░ 15% used
+#### Connecting to Claude Code
 
-Context · 155k / 1M tokens
-███░░░░░░░░░░░░░░░░░ 16%
-─────────────────────────────────────────
-This session: $4.12 · 75k out · 112k in · 2M cached · 23 responses
-Limits updated 2 min ago
-Open Claude · Settings
-```
+Live state, the Lens and plan limits from the status line need a one-time setup: run **Status Flair: Connect to Claude Code**. You are also asked once on first run. It edits `~/.claude/settings.json` after saving a backup next to it, and adds:
 
-The item turns amber when the 5-hour or weekly usage passes `statusFlair.claude.usageWarningThreshold` (80% by default). Clicking it opens Claude Code.
+- hooks that record each session's state and current activity, next to any hooks you already have;
+- a status line recorder that saves `rate_limits`, `context_window` and `cost`. If you already have a status line, it keeps working: it gets the same input and its output is unchanged.
 
-Model and token counts are read from Claude Code's local transcripts (`~/.claude/projects`), so they work out of the box. **Live state and plan usage need the integration:** run **Status Flair: Connect to Claude Code** (you will also be asked once on first run). It edits `~/.claude/settings.json`, keeps a backup of the file, and adds two things:
+Both scripts print nothing, always exit successfully, and only write small files under `~/.claude/status-flair`, so they cannot change what Claude does. **Status Flair: Disconnect from Claude Code** removes them and puts your previous status line back exactly. If another tool replaces the status line later, Status Flair notices and offers to reconnect.
 
-- **Hooks** that record whether each session is working, waiting for you, or done. Your other hooks are left untouched.
-- **A status line recorder.** Plan limits are only published through Claude Code's documented [status line input](https://code.claude.com/docs/en/statusline), so Status Flair registers a small script there that saves `rate_limits`, `context_window` and `cost`. If you already have a status line, it is kept: it receives the same input and its output is unchanged.
+#### Every session in one place
 
-Both scripts print nothing, always exit successfully, and only write small files under `~/.claude/status-flair`, so they cannot change what Claude does. **Status Flair: Disconnect from Claude Code** removes them and restores your previous status line exactly. If another tool later replaces the status line, Status Flair notices and offers to reconnect.
+With several sessions open across projects and worktrees, an inbox item counts them: `$(bell-dot) 1  $(check) 2  $(loading~spin) 3` means one is waiting for you, two finished and you have not looked yet, and three are working. Click it to see each session with the start of its prompt and how long Claude has worked and waited for you, then jump to its window.
 
-Plan limits are only reported for Claude Pro and Max subscribers, after the first response of a session. They are account-wide, so any session refreshes them.
+You get a message when a session needs you or finishes, naming the project and worktree ("Claude finished · hub-preditivo / 048-operacao"), or a desktop notification when VS Code is in the background. Nothing shows when you are already looking at that session's window, and only one VS Code window notifies. `statusFlair.claude.notify` turns this down or off.
 
-**All your Claude sessions in one place.** When you run several Claude sessions across projects and worktrees, an inbox item shows them all: `$(bell-dot) 2  $(loading~spin) 3` means two are waiting for you and three are working. Click it to see each one (longest wait first) with the start of its prompt and how long Claude has worked and waited for you, then jump straight to its window. When a session needs you or finishes, you get a VS Code message, or a desktop notification when VS Code is in the background. Nothing shows when you are already looking at that session's window, and only one window notifies (`statusFlair.claude.notify`).
+#### Claude Lens
 
-**Claude Lens: what the AI is doing right now.** A status bar item shows the current action, like `Editing controller.ts` or `Approve Bash: rm -rf dist`. Click it to open the Claude Lens panel, which updates live: the current action with a timer, subagents running and done, this turn's timeline (commands with ✓/✗ and duration, edits, searches, calls made by subagents) and the files changed with +/- lines. Pick any session on the machine from its dropdown. It works with the Claude Code extension's panel, where Claude Code's own terminal plugins cannot draw.
+A status bar item shows what Claude is doing right now, like `Editing controller.ts` or `Approve Bash: rm -rf dist`. Click it to open the Claude Lens panel. It updates live with the current action and a timer, the subagents that are running or done, this turn's timeline (commands with their result and duration, edits, searches, and calls made by subagents), and the files changed with their added and removed lines. The dropdown at the top switches between sessions on the machine.
 
-**Know which agent finished, and where.** Finished sessions stay in the inbox as unread (`✓ 2`) until you open them, and you get a message naming the project and worktree: "Claude finished · hub-preditivo / 048-operacao", with a button to jump there.
+The Lens also works when you use Claude Code from its VS Code extension, where Claude Code's own terminal plugins do not draw.
 
-**Context and limits ahead of time.** The Claude item turns amber when the context passes `contextWarningThreshold` (70%) and the panel suggests `/compact`. With a few readings of your plan usage, the panel projects the pace: "At this pace it runs out Thu 3:00 PM" or "On pace for about 60% by reset".
+#### Optional
 
-Optional extras:
-
-- `statusFlair.claude.colorizeStatusBar`: paint the whole bar blue while Claude works, amber while it waits, and green when it finishes. Colors are configurable. This writes to the workspace settings so each project window shows its own state.
-- `statusFlair.claude.notify`: get a VS Code notification when Claude needs you (or also when it finishes) and the window is not focused.
+`statusFlair.claude.colorizeStatusBar` paints the whole bar blue while Claude works, amber while it waits and green when it finishes. It writes to the workspace settings, so each project window shows its own state.
 
 ### Git worktrees
 
-In a git repository, a worktree item shows where you are: `$(worktree) feat-login · 4`. A bell appears when Claude is waiting for you in another worktree.
-
-Click it to switch:
+In a git repository, a worktree item shows where you are, like `$(worktree) feat-login · 4`, with a bell when Claude is waiting for you in another worktree. Click it to switch:
 
 ```text
  Worktrees · hub-preditivo
  ─────────────────────────────────────────────────
  $(repo) hub-preditivo      developer · this window
- 🔔 048-operacao            docs/048-regras   Claude waiting for you · clean
- ⟳ 063-board-pr             ci/063-board      Claude working · 2 changes
+ 🔔 048-operacao            docs/048-regras  #60 merged   Claude waiting for you
+ ⟳ 063-board-pr             ci/063-board     #64 open     Claude working · 2 changes
  ─────────────────────────────────────────────────
  + New worktree…
  ✦ New worktree with Claude…
  🗑 Clean up worktrees…
 ```
 
-- **Enter** opens the worktree in a new window. The row buttons open it in this window, copy its path, or delete it.
-- **New worktree** asks for a branch: an existing one is checked out as is; a new one starts from an up-to-date shared base, by default the main worktree's branch on the remote (like `origin/developer`), never from the worktree you are in. Other worktrees, and the agents working in them, are not touched. The branch button picks another base. It goes to `statusFlair.worktrees.location`, which defaults to Claude Code's `.claude/worktrees/<branch>`. Folders inside the repository are added to `.git/info/exclude` (local, never committed). Files listed in `statusFlair.worktrees.copyFiles` (like `.env`) are copied over.
-- **Clean up worktrees** fetches, then lists worktrees you can let go of. Merged branches, branches whose remote was deleted after the PR, and folders that no longer exist are pre-selected. Stale ones (no commits for `staleDays`) are listed but not selected. The main worktree and this window's are never offered, and worktrees with uncommitted changes or an active Claude session are flagged and left unselected. Branches are kept unless you confirm deleting them in a second step. "Merged" means merged into origin's default branch or into the main worktree's branch (like `developer`).
+Enter opens the worktree in a new window. The buttons on each row open it in this window, copy its path, or delete it.
 
-Optional: `statusFlair.worktrees.autoColor` gives each worktree a stable color derived from its name, so windows are easy to tell apart. It only writes `.vscode/settings.json` where git ignores it, and offers to ignore it locally.
+New worktree asks for a branch. An existing branch is checked out as is. A new one starts from an up-to-date shared base, by default the main worktree's branch on the remote (like `origin/developer`), and never from the worktree you happen to be in, so a new task does not inherit another task's commits and the agents working elsewhere are not touched. The branch button picks a different base. The worktree goes to `statusFlair.worktrees.location`, which defaults to Claude Code's `.claude/worktrees/<branch>`. Folders inside the repository are added to `.git/info/exclude`, which is local and never committed, and files listed in `statusFlair.worktrees.copyFiles` (like `.env`) are copied over.
+
+Clean up worktrees fetches first, then lists the worktrees you can let go of. Worktrees whose branch or pull request was merged, whose remote branch was deleted, or whose folder no longer exists come pre-selected. Ones with no commits for `staleDays` are listed but not selected. The main worktree and the one in this window are never offered, and worktrees with uncommitted changes or an active Claude session are flagged and left unselected. Branches are only deleted if you confirm it in a second step.
+
+`statusFlair.worktrees.autoColor` gives each worktree a stable color derived from its name. It only writes `.vscode/settings.json` where git ignores that file, and offers to ignore it locally.
 
 ### Pull requests and issues
 
-With the [GitHub CLI](https://cli.github.com) signed in, a pull request item shows the current branch's PR and CI: `$(git-pull-request) #62 $(check) $(pass)` (checks passing, approved), `$(x)` with a red background when checks fail. The tooltip lists failing checks with links, the review state, and the issue the branch points to (`feat/056-…` → issue #56). Click to open the PR, or to create one when the branch has none.
-
-The worktree picker shows each worktree's PR and issue, and clean up treats a merged PR as merged, which also catches squash merges that git cannot see.
+With the GitHub CLI signed in, a pull request item shows the current branch's PR and its checks, like `$(git-pull-request) #62 $(check) $(pass)` for passing checks and an approved review. It turns red when a check fails. The tooltip lists failing checks with links, the review state, and the issue the branch name points to (`feat/056-…` points to issue #56). A click opens the PR, or offers to create one when the branch has none.
 
 ## Commands
 
-| Command | |
+| Command | What it does |
 | --- | --- |
 | Status Flair: Pick Status Bar Color | Presets with live preview, custom hex, random |
-| Status Flair: Pick Color for This Workspace | Same, saved to this project only |
-| Status Flair: Random Status Bar Color | Roll a new color |
-| Status Flair: Reset Colors | Remove every color Status Flair set and restore what was there |
-| Status Flair: Open Claude Code | Open Claude Code |
-| Status Flair: Connect to / Disconnect from Claude Code | Manage the live state and usage integration |
-| Status Flair: Go to Claude Session… | Every active Claude session, jump to its window |
-| Status Flair: Open Pull Request | Open (or create) the current branch's PR |
-| Status Flair: Switch Worktree… | Worktree picker |
-| Status Flair: New Worktree… | Create a worktree and open it |
-| Status Flair: Clean Up Worktrees… | Delete merged or abandoned worktrees, with confirmation |
-| Status Flair: Open Settings | Jump to all settings |
+| Status Flair: Pick Color for This Workspace | The same, saved to this project only |
+| Status Flair: Random Status Bar Color | Rolls a new color |
+| Status Flair: Reset Colors | Removes every color Status Flair set and restores what was there |
+| Status Flair: Connect to / Disconnect from Claude Code | Installs or removes the hooks and status line recorder |
+| Status Flair: Go to Claude Session… | Lists every active session and jumps to its window |
+| Status Flair: Show Claude Lens | Opens the Lens panel |
+| Status Flair: Open Claude Code | Opens Claude Code |
+| Status Flair: Open Pull Request | Opens the current branch's PR, or creates one |
+| Status Flair: Switch Worktree… | Opens the worktree picker |
+| Status Flair: New Worktree… | Creates a worktree and opens it |
+| Status Flair: Clean Up Worktrees… | Deletes merged or abandoned worktrees after you confirm |
+| Status Flair: Open Settings | Shows all Status Flair settings |
 
-## Notes
+All settings live under `statusFlair.*`; search for "Status Flair" in the Settings editor to see them with their descriptions.
 
-- Uninstalling the extension does not clean `settings.json` (VS Code gives extensions no chance to). Run **Reset Colors** and **Disconnect from Claude Code** first.
-- The scripts run with `node`, which must be on your PATH.
-- If you use `CLAUDE_CONFIG_DIR`, it is picked up automatically, or you can set `statusFlair.claude.configDir`.
+## Privacy
 
-## Development
+Status Flair has no telemetry and no servers. It reads Claude Code's local transcripts and the state files its own scripts write, and calls `git` and `gh` on your machine. The only network traffic is what those tools do on your behalf: `git fetch` before creating or cleaning up worktrees, and GitHub CLI requests for pull requests and issues. Desktop notifications on Windows go through PowerShell.
 
-```bash
-npm install
-npm test          # compiles and runs the unit tests
-npm run package   # builds status-flair-<version>.vsix
-```
+The files it writes outside your workspace are `~/.claude/settings.json` (only when you connect or disconnect, with a backup) and the small state files under `~/.claude/status-flair`.
 
-Press F5 in VS Code to launch an Extension Development Host.
+## Uninstalling
+
+VS Code gives extensions no chance to clean up when they are uninstalled. Before removing Status Flair, run **Status Flair: Reset Colors** and **Status Flair: Disconnect from Claude Code** so your settings and Claude Code configuration go back to how they were.
+
+The scripts run with `node`, which must be on your PATH. If you use `CLAUDE_CONFIG_DIR`, Status Flair picks it up, or you can set `statusFlair.claude.configDir`.
+
+## Contributing
+
+Bug reports, ideas and pull requests are welcome. [CONTRIBUTING.md](CONTRIBUTING.md) explains how to build, test and debug the extension, and how the code is organized. Please read the [code of conduct](CODE_OF_CONDUCT.md) first, and report security issues privately as described in [SECURITY.md](SECURITY.md).
 
 ## License
 
