@@ -9,13 +9,13 @@
   },
   "license": "MIT",
   "icon": "images/icon.png",
-  "homepage": "https://github.com/thiagocorreanet/status-flair#readme",
+  "homepage": "https://github.com/thiagobotelhonet/status-flair#readme",
   "repository": {
     "type": "git",
-    "url": "https://github.com/thiagocorreanet/status-flair.git"
+    "url": "https://github.com/thiagobotelhonet/status-flair.git"
   },
   "bugs": {
-    "url": "https://github.com/thiagocorreanet/status-flair/issues"
+    "url": "https://github.com/thiagobotelhonet/status-flair/issues"
   },
   "engines": {
     "vscode": "^1.90.0"
