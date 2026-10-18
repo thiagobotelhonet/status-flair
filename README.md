@@ -2,8 +2,6 @@
 
 Make the VS Code status bar yours: a personal item, colors for the whole bar or for each project, and a live Claude Code indicator that tells you when Claude is working, waiting for you, or done.
 
-Inspired by [Status Bar Customizer](https://github.com/EduardoPires/vscode-status-bar-custom-item) by Eduardo Pires.
-
 > Status Flair is an independent project. It is not made by, affiliated with, or endorsed by Anthropic. "Claude" and "Claude Code" are trademarks of Anthropic, used here only to describe compatibility.
 
 ## Features
