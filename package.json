@@ -1,0 +1,567 @@
+{
+  "name": "status-flair",
+  "displayName": "Status Flair",
+  "description": "Personalize your status bar, and keep every Claude Code session, worktree and pull request one click away.",
+  "version": "0.4.0",
+  "publisher": "thiagocorreanet",
+  "author": {
+    "name": "Thiago Corrêa"
+  },
+  "license": "MIT",
+  "icon": "images/icon.png",
+  "homepage": "https://github.com/thiagocorreanet/status-flair#readme",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/thiagocorreanet/status-flair.git"
+  },
+  "bugs": {
+    "url": "https://github.com/thiagocorreanet/status-flair/issues"
+  },
+  "engines": {
+    "vscode": "^1.90.0"
+  },
+  "categories": [
+    "Themes",
+    "Other"
+  ],
+  "keywords": [
+    "status bar",
+    "statusbar",
+    "color",
+    "workspace color",
+    "customize",
+    "claude",
+    "claude code",
+    "worktree",
+    "git worktree",
+    "github",
+    "pull request",
+    "productivity"
+  ],
+  "galleryBanner": {
+    "color": "#2b1035",
+    "theme": "dark"
+  },
+  "activationEvents": [
+    "onStartupFinished"
+  ],
+  "main": "./out/extension.js",
+  "contributes": {
+    "commands": [
+      {
+        "command": "statusFlair.pickColor",
+        "title": "Pick Status Bar Color",
+        "category": "Status Flair"
+      },
+      {
+        "command": "statusFlair.pickWorkspaceColor",
+        "title": "Pick Color for This Workspace",
+        "category": "Status Flair"
+      },
+      {
+        "command": "statusFlair.randomColor",
+        "title": "Random Status Bar Color",
+        "category": "Status Flair"
+      },
+      {
+        "command": "statusFlair.resetColors",
+        "title": "Reset Colors",
+        "category": "Status Flair"
+      },
+      {
+        "command": "statusFlair.openSettings",
+        "title": "Open Settings",
+        "category": "Status Flair"
+      },
+      {
+        "command": "statusFlair.claude.open",
+        "title": "Open Claude Code",
+        "category": "Status Flair"
+      },
+      {
+        "command": "statusFlair.claude.installHooks",
+        "title": "Connect to Claude Code",
+        "category": "Status Flair"
+      },
+      {
+        "command": "statusFlair.claude.uninstallHooks",
+        "title": "Disconnect from Claude Code",
+        "category": "Status Flair"
+      },
+      {
+        "command": "statusFlair.itemClick",
+        "title": "Item Click",
+        "category": "Status Flair"
+      },
+      {
+        "command": "statusFlair.worktrees.pick",
+        "title": "Switch Worktree…",
+        "category": "Status Flair"
+      },
+      {
+        "command": "statusFlair.worktrees.create",
+        "title": "New Worktree…",
+        "category": "Status Flair"
+      },
+      {
+        "command": "statusFlair.worktrees.cleanup",
+        "title": "Clean Up Worktrees…",
+        "category": "Status Flair"
+      },
+      {
+        "command": "statusFlair.claude.inbox",
+        "title": "Go to Claude Session…",
+        "category": "Status Flair"
+      },
+      {
+        "command": "statusFlair.github.openPr",
+        "title": "Open Pull Request",
+        "category": "Status Flair"
+      },
+      {
+        "command": "statusFlair.lens.show",
+        "title": "Show Claude Lens",
+        "category": "Status Flair"
+      }
+    ],
+    "menus": {
+      "commandPalette": [
+        {
+          "command": "statusFlair.itemClick",
+          "when": "false"
+        },
+        {
+          "command": "statusFlair.pickWorkspaceColor",
+          "when": "workspaceFolderCount > 0"
+        },
+        {
+          "command": "statusFlair.worktrees.pick",
+          "when": "workspaceFolderCount > 0"
+        },
+        {
+          "command": "statusFlair.worktrees.create",
+          "when": "workspaceFolderCount > 0"
+        },
+        {
+          "command": "statusFlair.worktrees.cleanup",
+          "when": "workspaceFolderCount > 0"
+        }
+      ]
+    },
+    "configuration": [
+      {
+        "title": "Item",
+        "order": 1,
+        "properties": {
+          "statusFlair.item.enabled": {
+            "type": "boolean",
+            "default": true,
+            "description": "Show the custom status bar item."
+          },
+          "statusFlair.item.text": {
+            "type": "string",
+            "default": "${user}",
+            "markdownDescription": "Item text. Supports variables: `${user}`, `${workspaceName}`, `${folderName}`, `${gitBranch}`, `${worktreeName}`, `${worktreeCount}`, `${prNumber}`, `${issueTitle}`, `${time}`, `${date}`, and the Claude Code ones: `${claudeModel}`, `${claudeContext}`, `${claudeContextPercent}`, `${claudeState}`, `${claudeUsage5h}`, `${claudeUsageWeek}`, `${claudeCost}`."
+          },
+          "statusFlair.item.icon": {
+            "type": "string",
+            "default": "$(flame)",
+            "markdownDescription": "Icon shown before the text. Use a [codicon](https://code.visualstudio.com/api/references/icons-in-labels#icon-listing) like `$(heart)` or any emoji like `🔥`. Leave empty for no icon."
+          },
+          "statusFlair.item.tooltip": {
+            "type": "string",
+            "default": "This VS Code belongs to ${user}",
+            "markdownDescription": "Tooltip text. Supports the same variables as `#statusFlair.item.text#`."
+          },
+          "statusFlair.item.alignment": {
+            "type": "string",
+            "enum": [
+              "left",
+              "right"
+            ],
+            "default": "left",
+            "description": "Side of the status bar where the item appears."
+          },
+          "statusFlair.item.priority": {
+            "type": "number",
+            "default": 10000,
+            "description": "Higher values place the item further left (or further right, when right-aligned)."
+          },
+          "statusFlair.item.clickAction": {
+            "type": "string",
+            "enum": [
+              "none",
+              "openSettings",
+              "pickColor",
+              "openUrl",
+              "runCommand",
+              "openClaude"
+            ],
+            "enumDescriptions": [
+              "Do nothing.",
+              "Open the Status Flair settings.",
+              "Open the color picker.",
+              "Open the URL in `statusFlair.item.clickValue`.",
+              "Run the command ID in `statusFlair.item.clickValue`.",
+              "Open Claude Code."
+            ],
+            "default": "pickColor",
+            "description": "What happens when you click the item."
+          },
+          "statusFlair.item.clickValue": {
+            "type": "string",
+            "default": "",
+            "markdownDescription": "URL or command ID used by the `openUrl` and `runCommand` click actions."
+          },
+          "statusFlair.extraItems": {
+            "type": "array",
+            "default": [],
+            "markdownDescription": "Additional items. Each one accepts `text`, `icon`, `tooltip`, `alignment`, `priority`, and either `url` or `command` (with optional `args`).",
+            "items": {
+              "type": "object",
+              "properties": {
+                "text": {
+                  "type": "string"
+                },
+                "icon": {
+                  "type": "string"
+                },
+                "tooltip": {
+                  "type": "string"
+                },
+                "alignment": {
+                  "type": "string",
+                  "enum": [
+                    "left",
+                    "right"
+                  ]
+                },
+                "priority": {
+                  "type": "number"
+                },
+                "url": {
+                  "type": "string"
+                },
+                "command": {
+                  "type": "string"
+                },
+                "args": {
+                  "type": "array"
+                }
+              }
+            }
+          }
+        }
+      },
+      {
+        "title": "Colors",
+        "order": 2,
+        "properties": {
+          "statusFlair.colors.target": {
+            "type": "string",
+            "enum": [
+              "global",
+              "workspace"
+            ],
+            "enumDescriptions": [
+              "Write colors to your user settings (all windows).",
+              "Write colors to this workspace's .vscode/settings.json (this project only)."
+            ],
+            "default": "global",
+            "description": "Where Status Flair writes the status bar colors."
+          },
+          "statusFlair.colors.background": {
+            "type": "string",
+            "default": "",
+            "markdownDescription": "Status bar background, as a hex color like `#9f00a6`. Leave empty to keep VS Code's theme colors. The other colors are derived from it unless you set them."
+          },
+          "statusFlair.colors.foreground": {
+            "type": "string",
+            "default": "",
+            "description": "Status bar text color. Empty picks white or dark automatically for contrast."
+          },
+          "statusFlair.colors.noFolderBackground": {
+            "type": "string",
+            "default": "",
+            "description": "Background when no folder is open. Empty derives a slightly darker shade."
+          },
+          "statusFlair.colors.debuggingBackground": {
+            "type": "string",
+            "default": "",
+            "description": "Background while debugging. Empty derives a darker shade."
+          },
+          "statusFlair.colors.debuggingForeground": {
+            "type": "string",
+            "default": "",
+            "description": "Text color while debugging. Empty picks one automatically."
+          },
+          "statusFlair.colors.remoteBackground": {
+            "type": "string",
+            "default": "",
+            "description": "Background of the remote indicator (SSH, WSL, containers). Empty derives a darker shade."
+          },
+          "statusFlair.colors.remoteForeground": {
+            "type": "string",
+            "default": "",
+            "description": "Text color of the remote indicator. Empty picks one automatically."
+          }
+        }
+      },
+      {
+        "title": "Claude Code",
+        "order": 3,
+        "properties": {
+          "statusFlair.claude.enabled": {
+            "type": "boolean",
+            "default": true,
+            "description": "Show a Claude Code item with the current session's state, model and context size."
+          },
+          "statusFlair.claude.text": {
+            "type": "string",
+            "default": "${claudeModel} · ${claudeContext}",
+            "markdownDescription": "Claude item text. The icon follows the session state. Supports the same variables as `#statusFlair.item.text#`."
+          },
+          "statusFlair.claude.alignment": {
+            "type": "string",
+            "enum": [
+              "left",
+              "right"
+            ],
+            "default": "right",
+            "description": "Side of the status bar for the Claude item."
+          },
+          "statusFlair.claude.priority": {
+            "type": "number",
+            "default": 1000,
+            "description": "Position of the Claude item."
+          },
+          "statusFlair.claude.clickAction": {
+            "type": "string",
+            "enum": [
+              "openClaude",
+              "newConversation",
+              "openTerminal",
+              "none"
+            ],
+            "enumDescriptions": [
+              "Open Claude Code (the extension if installed, otherwise a terminal).",
+              "Start a new conversation in the Claude Code extension.",
+              "Run `claude` in a new terminal.",
+              "Do nothing."
+            ],
+            "default": "openClaude",
+            "description": "What happens when you click the Claude item."
+          },
+          "statusFlair.claude.colorizeStatusBar": {
+            "type": "boolean",
+            "default": false,
+            "markdownDescription": "Paint the whole status bar with the state color while Claude works, waits or finishes. Requires the hooks and an open folder; it writes to this workspace's settings."
+          },
+          "statusFlair.claude.colors.working": {
+            "type": "string",
+            "default": "#1f6feb",
+            "description": "Status bar color while Claude is working (when colorizing is on)."
+          },
+          "statusFlair.claude.colors.waiting": {
+            "type": "string",
+            "default": "#d29922",
+            "description": "Status bar color while Claude waits for your permission or answer."
+          },
+          "statusFlair.claude.colors.done": {
+            "type": "string",
+            "default": "#2ea043",
+            "description": "Status bar color right after Claude finishes."
+          },
+          "statusFlair.claude.colors.error": {
+            "type": "string",
+            "default": "#cf222e",
+            "description": "Status bar color when a turn ends with an API error."
+          },
+          "statusFlair.claude.notify": {
+            "type": "string",
+            "enum": [
+              "off",
+              "waiting",
+              "all"
+            ],
+            "enumDescriptions": [
+              "No notifications.",
+              "Notify only when a Claude Code session needs you.",
+              "Notify when a session needs you, finishes, or stops with an error (default), naming the project and worktree."
+            ],
+            "default": "all",
+            "markdownDescription": "Notify about Claude Code sessions in **any** project: a VS Code message when VS Code is focused, a desktop notification otherwise. Nothing is shown when you are already looking at that session's window, and only one window notifies."
+          },
+          "statusFlair.claude.doneTimeout": {
+            "type": "number",
+            "default": 20,
+            "minimum": 0,
+            "description": "Seconds the 'done' state stays visible before going back to idle."
+          },
+          "statusFlair.claude.staleTimeout": {
+            "type": "number",
+            "default": 15,
+            "minimum": 1,
+            "description": "Minutes without hook events after which a 'working' or 'waiting' session counts as idle (covers interrupted turns)."
+          },
+          "statusFlair.claude.sessionMaxAge": {
+            "type": "number",
+            "default": 12,
+            "minimum": 0,
+            "description": "Hide the Claude item when this workspace's latest session is older than this many hours. 0 never hides it."
+          },
+          "statusFlair.claude.usageWarningThreshold": {
+            "type": "number",
+            "default": 80,
+            "minimum": 1,
+            "maximum": 100,
+            "markdownDescription": "Highlight the Claude item when the 5-hour or weekly plan usage reaches this percentage. Plan usage needs **Status Flair: Connect to Claude Code** and a Pro or Max plan."
+          },
+          "statusFlair.claude.contextWarningThreshold": {
+            "type": "number",
+            "default": 70,
+            "minimum": 1,
+            "maximum": 100,
+            "description": "Highlight the Claude item and suggest /compact when the context window is this full (percent)."
+          },
+          "statusFlair.claude.inbox": {
+            "type": "boolean",
+            "default": true,
+            "description": "Show an item with every active Claude Code session on this machine (waiting, working, errors). Click it to jump to a session."
+          },
+          "statusFlair.claude.lens": {
+            "type": "boolean",
+            "default": true,
+            "markdownDescription": "Show what Claude is doing right now in the status bar (`Editing controller.ts`). Click it to open the **Claude Lens** panel: current action, subagents, this turn's timeline and the files changed, live."
+          },
+          "statusFlair.claude.configDir": {
+            "type": "string",
+            "default": "",
+            "markdownDescription": "Claude Code config directory. Empty uses `CLAUDE_CONFIG_DIR` or `~/.claude`."
+          }
+        }
+      },
+      {
+        "title": "Worktrees",
+        "order": 4,
+        "properties": {
+          "statusFlair.worktrees.enabled": {
+            "type": "boolean",
+            "default": true,
+            "description": "Show a git worktree item in repositories. Click it to switch, create or clean up worktrees."
+          },
+          "statusFlair.worktrees.alignment": {
+            "type": "string",
+            "enum": [
+              "left",
+              "right"
+            ],
+            "default": "left",
+            "description": "Side of the status bar for the worktree item."
+          },
+          "statusFlair.worktrees.priority": {
+            "type": "number",
+            "default": 9999,
+            "description": "Position of the worktree item."
+          },
+          "statusFlair.worktrees.location": {
+            "type": "string",
+            "default": "${repoRoot}/.claude/worktrees/${branchSlug}",
+            "markdownDescription": "Where new worktrees are created. Variables: `${repoRoot}`, `${repoParent}`, `${repoName}`, `${branch}`, `${branchSlug}`. The default matches Claude Code. Use `${repoParent}/${repoName}.worktrees/${branchSlug}` to keep them outside the repository. Folders inside the repository are added to `.git/info/exclude`, which is never committed."
+          },
+          "statusFlair.worktrees.base": {
+            "type": "string",
+            "default": "",
+            "markdownDescription": "Branch new worktrees start from, like `origin/developer`. Empty uses the main worktree's branch as it is on the remote, falling back to origin's default branch. Remote bases are fetched first, and you can pick another base when creating. New branches never start from the worktree you happen to be in, so a new task does not inherit another task's commits."
+          },
+          "statusFlair.worktrees.openIn": {
+            "type": "string",
+            "enum": [
+              "newWindow",
+              "currentWindow"
+            ],
+            "default": "newWindow",
+            "description": "Where a worktree opens when you pick or create it."
+          },
+          "statusFlair.worktrees.copyFiles": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            },
+            "default": [],
+            "markdownDescription": "Untracked files or folders copied into each new worktree, relative to the repository root, like `.env` or `.env.local`."
+          },
+          "statusFlair.worktrees.staleDays": {
+            "type": "number",
+            "default": 14,
+            "minimum": 1,
+            "description": "Clean up suggests worktrees whose branch has had no commits for this many days (unchecked by default)."
+          },
+          "statusFlair.worktrees.autoColor": {
+            "type": "boolean",
+            "default": false,
+            "markdownDescription": "Give each linked worktree its own status bar color, derived from its name. It writes to the worktree's `.vscode/settings.json`, so it only does so where git ignores that file (it offers to ignore it locally)."
+          }
+        }
+      },
+      {
+        "title": "GitHub",
+        "order": 5,
+        "properties": {
+          "statusFlair.github.enabled": {
+            "type": "boolean",
+            "default": true,
+            "markdownDescription": "Show the pull request and CI status of the current branch, and PRs and issues in the worktree picker. Needs the [GitHub CLI](https://cli.github.com) (`gh`), signed in."
+          },
+          "statusFlair.github.alignment": {
+            "type": "string",
+            "enum": [
+              "left",
+              "right"
+            ],
+            "default": "left",
+            "description": "Side of the status bar for the pull request item."
+          },
+          "statusFlair.github.priority": {
+            "type": "number",
+            "default": 9998,
+            "description": "Position of the pull request item."
+          }
+        }
+      }
+    ],
+    "viewsContainers": {
+      "activitybar": [
+        {
+          "id": "statusFlairLens",
+          "title": "Claude Lens",
+          "icon": "resources/lens.svg"
+        }
+      ]
+    },
+    "views": {
+      "statusFlairLens": [
+        {
+          "type": "webview",
+          "id": "statusFlair.lens",
+          "name": "Claude Lens"
+        }
+      ]
+    }
+  },
+  "scripts": {
+    "vscode:prepublish": "npm run compile",
+    "compile": "tsc -p ./",
+    "watch": "tsc -watch -p ./",
+    "test": "npm run compile && node --test \"out/test/**/*.test.js\"",
+    "icon": "node scripts/make-icon.js",
+    "package": "vsce package",
+    "publish": "vsce publish"
+  },
+  "devDependencies": {
+    "@types/node": "^20.14.0",
+    "@types/vscode": "~1.90.0",
+    "@vscode/vsce": "^3.2.0",
+    "typescript": "^5.6.0"
+  }
+}
